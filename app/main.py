@@ -14,6 +14,14 @@ if not os.path.exists(log_file_path):
     logging.info(f"[+] !!! Log File SECTION !!! [+]")
     open(log_file_path, 'a').close()
     logging.info(f"[+] Log file created at {datetime.now()}")
+
+else:
+    logging.info(f"[+] !!! Log File SECTION !!! [+]")
+    print(f"[+] !!! Log File SECTION !!! [+]")
+    logging.info(f"[+] Log file seen and it was created at {datetime.now()}")
+    print(f"[+] Log file seen and it was created at {datetime.now()}")
+    logging.info(f"[+] !!! Resuming Application at {datetime.now()} !!! [+]")
+    print(f"[+] !!! Resuming Application at {datetime.now()} !!! [+]")
 logging.basicConfig(filename=log_file_path, level=logging.INFO,
                     format='%(asctime)s %(levelname)s: %(message)s')
 
@@ -22,16 +30,19 @@ db_dir = "/etc"
 db_path = os.path.join(db_dir, "reboot_schedule.db")
 
 # Ensure the database directory exists
-if not os.path.exists(db_dir):
+if not os.path.exists(db_path):
 
     logging.info("[+] !!! WELCOME TO REBOOT MANAGER SCRIPT !!! [+]")
 
     print("[+] First run, creating database file...")
-    os.makedirs(db_dir)
+
 
 else:
 
+    logging.info("[+] !!! DATABASE SECTION !!! [+]")
+    print("[+] !!! DATABASE SECTION !!! [+]")
     logging.info("[+] !!! REBOOT MANAGER SCRIPT RESUMED !!! [+]")
+    print("[+] !!! REBOOT MANAGER SCRIPT RESUMED !!! [+]")
 
     print("[+] Welcome back: resuming application...!!!...")
 
@@ -57,10 +68,11 @@ def setup_database():
     c.execute('SELECT COUNT(*) FROM reboots')
     if c.fetchone()[0] == 0:
         first_run_time = datetime.now()
+        next_reboot = (datetime.now() + timedelta(hours=3))
         c.execute('''
-            INSERT INTO reboots (first_reboot, first_run_stat, first_run_time, reboot_count)
-            VALUES (?, ?, ?, ?)
-        ''', (first_run_time + timedelta(hours=3), True, first_run_time, 0))
+            INSERT INTO reboots (first_reboot, first_run_stat, first_run_time, reboot_count, next_reboot)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (first_run_time + timedelta(hours=3), True, first_run_time, 0, next_reboot))
         conn.commit()
     conn.close()
 
@@ -124,7 +136,7 @@ def reboot_server():
             first_reboot = datetime.now() + timedelta(hours=3)
             first_run_time = datetime.now()
             reboot_count = 1
-            first_run_stat = True
+            first_run_stat = False
 
         last_reboot = datetime.now()
         next_reboot = last_reboot + timedelta(hours=3)
@@ -146,31 +158,55 @@ def reboot_server():
 
 def schedule_next_reboot():
     logging.info(f"[+] Getting reboot info before scheduling.")
+    print(f"[+] Getting reboot info before scheduling.")
     reboot_info = get_reboot_info()
+    print(reboot_info)
 
     if reboot_info:
         logging.info(f"[+] Reboot info successfully fetched from the DB.")
+        print(f"[+] Reboot info successfully fetched from the DB.")
+
         last_reboot, next_reboot, first_reboot, first_run_stat, first_run_time, reboot_count = reboot_info
-        next_reboot_time = datetime.strptime(next_reboot, '%Y-%m-%d %H:%M:%S.%f')
+
+        # Convert next_reboot and first_run_time to datetime objects
+
+        first_run_time_dt = datetime.strptime(first_reboot, '%Y-%m-%d %H:%M:%S.%f')
+
+        # Check if this is the first run and reboot count is 0
+        if reboot_count == 0 and last_reboot is None:
+            logging.info("[+] First run with reboot count 0 detected.")
+            print("[+] First run with reboot count 0 detected.")
+            next_reboot_time = first_run_time_dt
+        else:
+            logging.info("[+] Subsequent run detected.")
+            print("[+] Subsequent run detected.")
+            next_reboot_time = datetime.strptime(next_reboot, '%Y-%m-%d %H:%M:%S.%f')
+
     else:
         logging.info(f"[+] No reboot info seen.\n\t[+] Scheduling....")
+        print(f"[+] No reboot info seen.\n\t[+] Scheduling....")
         next_reboot_time = datetime.now() + timedelta(hours=3)
 
     logging.info(f"[+] Scheduling next reboot at {next_reboot_time}")
+    print(f"[+] Scheduling next reboot at {next_reboot_time}")
 
     while datetime.now() < next_reboot_time:
         time.sleep(60)  # Check every minute
 
     reboot_server()
+    print("[-] rebooting")
 
 
 if __name__ == "__main__":
     if not os.path.exists(db_path):
         logging.info(f"[+] !!! DATABASE SECTION !!! [+]")
+        print(f"[+] !!! DATABASE SECTION !!! [+]")
         logging.info(f"[+] Database tables and columns file created at {datetime.now()}")
+        print(f"[+] Database tables and columns file created at {datetime.now()}")
         setup_database()
 
         # Log that the script has started
         logging.info("[+] !!! REBOOT MANAGER SCRIPT STARTED !!! [+]")
+        print("[+] !!! REBOOT MANAGER SCRIPT STARTED !!! [+]")
 
     schedule_next_reboot()
