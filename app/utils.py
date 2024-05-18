@@ -1,11 +1,15 @@
 import logging
-
+import os
 import telebot
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 # Telegram bot token and chat ID
-TELEGRAM_TOKEN = 'your-telegram-bot-token'
-CHAT_ID = 'your-chat-id'
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
 
 # Initialize Telegram bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
