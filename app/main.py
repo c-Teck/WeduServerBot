@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime, timedelta
 import time
 import os
-from app.utils import send_telegram_message
+from .utils import send_telegram_message
 
 # Set up logging
 log_dir = "/var/log"
