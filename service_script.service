@@ -1,0 +1,19 @@
+[Unit]
+Description=Reboot Manager Service
+After=network.target
+
+[Service]
+# Set the working directory
+WorkingDirectory=/usr/local/bin/WeduServerBot/
+
+# Activate the virtual environment and run the script
+ExecStart=/usr/local/bin/WeduServerBot/venv/bin/python /usr/local/bin/WeduServerBot/app/main.py
+
+# Restart the service always
+Restart=always
+
+# Specify the user (usually root for system-level services)
+User=root
+
+[Install]
+WantedBy=multi-user.target
