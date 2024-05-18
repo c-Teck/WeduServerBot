@@ -10,7 +10,7 @@ WorkingDirectory=/usr/local/bin/WeduServerBot/
 ExecStart=/usr/local/bin/WeduServerBot/venv/bin/python3 /usr/local/bin/WeduServerBot/app/main.py
 
 # Restart the service always
-Restart=always
+# Restart=always
 
 # Specify the user (usually root for system-level services)
 User=root
