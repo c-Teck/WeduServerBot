@@ -238,5 +238,5 @@ if __name__ == "__main__":
     # Send Telegram message with reboot count
     # Send Telegram message with reboot count and first run time
     send_telegram_message(
-        f"[+] Server has been restarted {reboot_count} times since first run at {first_reboot.strftime('%Y-%m-%d %H:%M:%S')}.")
+        f"[+] Server has been restarted {reboot_count} times since first run at {first_reboot}.")
     schedule_next_reboot()
